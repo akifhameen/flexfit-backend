@@ -2,7 +2,8 @@
     "compilerOptions": {
       "target": "ES6",
       "module": "CommonJS",
-      "checkJs": true
+      "checkJs": true,
+      "rootDir": "./src"
     },
     "exclude": [
       "node_modules"
