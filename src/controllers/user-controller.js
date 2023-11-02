@@ -3,15 +3,13 @@ import { User } from '../models/user.js';
 
 export const createUser = async (req, res) => {
   const {firstName, lastName, email, password, role} = req.body;
-
-  let checkUserEmail;
+  let checkUserEmail, hashedPassword;
 
   try {
     checkUserEmail = await User.findOne({ email: email });
   } catch (error) {
   }
 
-  let hashedPassword;
   try {
     hashedPassword = await bcrypt.hash(password, 12)
   } catch (error) {
@@ -41,21 +39,18 @@ export const createUser = async (req, res) => {
 
 export const login = async (req, res) => {
   const { email, password } = req.body;
-
-  let existingUser, userData;
+  let existingUser, userData, isValidPassword;
 
   try {
     existingUser = await User.findOne({ email: email });
     // @ts-ignore
-    userData = existingUser.toObject({ getters: true })
+    userData = existingUser.toObject({ getters: true });
   } catch (error) {
   }
 
   if (!existingUser) {
     console.log('no user found');
   }
-
-  let isValidPassword;
 
   try {
     // @ts-ignore
