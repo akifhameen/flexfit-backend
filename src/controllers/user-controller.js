@@ -11,7 +11,7 @@ export const createUser = async (req, res) => {
   }
 
   try {
-    hashedPassword = await bcrypt.hash(password, 12)
+    hashedPassword = await bcrypt.hash(password, 12);
   } catch (error) {
     console.log(error);
   } 
