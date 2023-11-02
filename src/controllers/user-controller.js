@@ -1,50 +1,76 @@
-import { User } from "../models/user.js";
-
-export const getAllUsers = async (req, res) => {
-  let users;
-
-  try {
-    users = await User.find();
-  } catch (error) {
-    res.status(500).json({ message: 'Something went wrong!' });
-  }
-  
-  if (!users) {
-    res.status(404).json({ message: 'No users found!' });
-  }
-  res.json(users);
-};
+import bcrypt from 'bcryptjs';
+import { User } from '../models/user.js';
 
 export const createUser = async (req, res) => {
-  const {firstName, lastName, email, password, role} = req.query;
+  const {firstName, lastName, email, password, role} = req.body;
+
+  let checkUserEmail;
+
+  try {
+    checkUserEmail = await User.findOne({ email: email });
+  } catch (error) {
+  }
+
+  let hashedPassword;
+  try {
+    hashedPassword = await bcrypt.hash(password, 12)
+  } catch (error) {
+    console.log(error);
+  } 
 
   const user = new User({
     firstName,
     lastName,
     email,
-    password,
+    password: hashedPassword,
     role
   });
+
   try {
+    // @ts-ignore
     const result = await user.save();
-    res.json(result);
+    const getUser = result.toObject({ getters: true });
+    delete getUser.password;
+    delete getUser._id;
+    delete getUser.__v;
+    res.json(getUser);
   } catch (error) {
     res.status(500).json({ message: 'Something went wrong!', error: error });
   }
 };
 
-export const getUserById = async (req, res) => {
-  const userId = req.params.userId;
-  let user;
+export const login = async (req, res) => {
+  const { email, password } = req.body;
+
+  let existingUser, userData;
 
   try {
-    user = await User.findById(userId);
+    existingUser = await User.findOne({ email: email });
+    // @ts-ignore
+    userData = existingUser.toObject({ getters: true })
   } catch (error) {
-    res.status(500).json({ message: 'Something went wrong!' });
   }
 
-  if (!user) {
-    res.status(404).json({ message: 'User not found!' });
+  if (!existingUser) {
+    console.log('no user found');
   }
-  res.json(user);
+
+  let isValidPassword;
+
+  try {
+    // @ts-ignore
+    isValidPassword = await bcrypt.compare(password, existingUser.password);
+  } catch(error) {}
+
+  // @ts-ignore
+  delete userData.password;
+  // @ts-ignore
+  delete userData._id;
+  // @ts-ignore
+  delete userData.__v;
+
+  res.json({
+    isAuthenticated: true,
+    user: userData
+  });
 };
