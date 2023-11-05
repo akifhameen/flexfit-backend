@@ -1,9 +1,10 @@
 import bcrypt from 'bcryptjs';
 import { User } from '../models/user.js';
 import HttpError from '../models/http-error.js';
+import { UserSubscription } from '../models/userSubscription.js';
 
 export const createUser = async (req, res, next) => {
-  const {firstName, lastName, email, password, role} = req.body;
+  const {firstName, lastName, email, password} = req.body;
   let checkUserEmail, hashedPassword;
 
   try {
@@ -36,7 +37,7 @@ export const createUser = async (req, res, next) => {
     lastName,
     email,
     password: hashedPassword,
-    role
+    role: 'member'
   });
 
   try {
@@ -58,7 +59,7 @@ export const createUser = async (req, res, next) => {
 
 export const login = async (req, res, next) => {
   const { email, password } = req.body;
-  let existingUser, userData, isValidPassword;
+  let existingUser, userData, isValidPassword, userSubscription;
 
   try {
     existingUser = await User.findOne({ email: email });
@@ -99,11 +100,35 @@ export const login = async (req, res, next) => {
     return next(error);
   }
 
-  // @ts-ignore
+  if (userData.userSubscriptionId) {
+    try {
+      userSubscription = await UserSubscription.findById(userData.userSubscriptionId);
+    } catch (e) {
+      const error = new HttpError(
+        'Loggin in failed, please try again later.',
+        500
+      );
+      return next(error);
+    }
+
+    if (!userSubscription) {
+      const error = new HttpError(
+        'Loggin in failed due to subscription error, please contact administration.',
+        404
+      );
+      return next(error);
+    }
+
+    const today = new Date();
+    // @ts-ignore
+    if (userSubscription.expirationDate >= today) {
+      // @ts-ignore
+      userData.plan = userSubscription.plan
+    }
+  }
+
   delete userData.password;
-  // @ts-ignore
   delete userData._id;
-  // @ts-ignore
   delete userData.__v;
 
   res.json({

@@ -7,6 +7,6 @@ const timeslotSchema = new mongoose.Schema({
   classId: { type: mongoose.Types.ObjectId, required: false, ref: 'Class' },
 });
 
-const TimeslotSchema = mongoose.model('TimeslotSchema', timeslotSchema);
+const Timeslot = mongoose.model('Timeslot', timeslotSchema);
 
-export { TimeslotSchema };
+export { Timeslot };
