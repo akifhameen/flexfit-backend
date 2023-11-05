@@ -1,9 +1,9 @@
 import mongoose from 'mongoose';
 
 const trainerSchema = new mongoose.Schema({
-  userId: { type: mongoose.Types.ObjectId, required: true, ref: 'User' },
-  picture: { type: String, required: true },
-  description: { type: String, required: true },
+  userId: { type: mongoose.Types.ObjectId, required: true, ref: 'User', unique: true },
+  picture: { type: String, required: false },
+  description: { type: String, required: false },
   availableSlots: { type: Number, required: true },
   remainingSlots: { type: Number, required: true }
 });
@@ -14,7 +14,7 @@ trainerSchema.pre('save', async(next) => {
     const user = await mongoose.model('User').findById(this.userId);
     // @ts-ignore
     if (this.remainingSlots <= 0) {
-      throw new Error('trainer isn unavailable.');
+      throw new Error('trainer isn\'t unavailable.');
     }
     if (user && user.role === 'trainer') {
       next();
