@@ -36,7 +36,8 @@ export const addClass = async(req, res) => {
   });
   const trainerSchedule = new TrainerSchedule({
     timeslotId: timeslot,
-    trainerId: trainer
+    trainerId: trainer,
+    type: 'class'
   });
   
   try {
@@ -97,4 +98,26 @@ export const removeClassById = async(req, res) => {
   } catch (e) {}
 
   res.json({ message: 'Class removed' })
+};
+
+export const getClassAvailability = async(req, res) => {
+  const day = req.params.day;
+
+  const availableSlots = Timeslot.find({
+    day,
+    classId: null
+  });
+
+  const availableSlotData = (await availableSlots).map(slot => {
+    return {
+      // @ts-ignore
+      id: slot._id,
+      // @ts-ignore
+      startTime: slot.startTime,
+      // @ts-ignore
+      timePeriod: `${slot.startTime}-${slot.endTime}`
+    }
+  });
+
+  res.json(availableSlotData);
 };

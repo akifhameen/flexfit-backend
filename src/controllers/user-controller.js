@@ -2,6 +2,7 @@ import bcrypt from 'bcryptjs';
 import { User } from '../models/user.js';
 import HttpError from '../models/http-error.js';
 import { UserSubscription } from '../models/userSubscription.js';
+import { Trainer } from '../models/trainer.js';
 
 export const createUser = async (req, res, next) => {
   const {firstName, lastName, email, password} = req.body;
@@ -192,13 +193,27 @@ export const getUserByEmail = async(req, res) => {
   res.send(user);
 }
 
-export const updateRoleByEmail = async(req, res) => {
+export const updateRoleByEmail = async(req, res, next) => {
   const { email, role } = req.body;
-  let user, updatedUser;
+  let user, updatedUser, trainer, trainerResult;
 
   try {
     user = await User.findOne(email);
   } catch (e) {}
+
+  if (!user) {
+    console.log('no user');
+  }
+
+  // @ts-ignore
+  if(user.role === 'trainer' && role === 'member') {
+    try {
+      // @ts-ignore
+      trainer = await Trainer.findOne({ userId: user._id });
+      // @ts-ignore
+      await trainer.remove();
+    } catch (e) {}
+  }
 
   // @ts-ignore
   user.role = role;
