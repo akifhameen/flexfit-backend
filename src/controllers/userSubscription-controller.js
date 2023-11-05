@@ -36,9 +36,9 @@ export const buySubscription = async(req, res, next) => {
     // @ts-ignore
     const result = await newSubscription.save();
     // @ts-ignore
-    existingUser.userSubscriptionId = existingSubscription;
+    existingUser.userSubscriptionId = result._id;
     // @ts-ignore
-    existingUser.save();
+    await existingUser.save();
     res.json({ plan: result.plan });
   } catch (e) {
     const error = new HttpError(
