@@ -1,19 +1,34 @@
 import bcrypt from 'bcryptjs';
 import { User } from '../models/user.js';
+import HttpError from '../models/http-error.js';
 
-export const createUser = async (req, res) => {
+export const createUser = async (req, res, next) => {
   const {firstName, lastName, email, password, role} = req.body;
   let checkUserEmail, hashedPassword;
 
   try {
     checkUserEmail = await User.findOne({ email: email });
-  } catch (error) {
+  } catch (e) {
+    const error = new HttpError(
+      'Signing up failed, please try again later.',
+      500
+    );
+    return next(error);
+  }
+
+  if (checkUserEmail) {
+    const error = new HttpError('Email already exists in the system', 409)
+    return next(error)
   }
 
   try {
     hashedPassword = await bcrypt.hash(password, 12);
-  } catch (error) {
-    console.log(error);
+  } catch (e) {
+    const error = new HttpError(
+      'Signing up failed, please try again later.',
+      500
+    );
+    return next(error);
   } 
 
   const user = new User({
@@ -32,12 +47,16 @@ export const createUser = async (req, res) => {
     delete getUser._id;
     delete getUser.__v;
     res.json(getUser);
-  } catch (error) {
-    res.status(500).json({ message: 'Something went wrong!', error: error });
+  } catch (e) {
+    const error = new HttpError(
+      'Signing up failed, please try again later.',
+      500
+    );
+    return next(error);
   }
 };
 
-export const login = async (req, res) => {
+export const login = async (req, res, next) => {
   const { email, password } = req.body;
   let existingUser, userData, isValidPassword;
 
@@ -45,17 +64,40 @@ export const login = async (req, res) => {
     existingUser = await User.findOne({ email: email });
     // @ts-ignore
     userData = existingUser.toObject({ getters: true });
-  } catch (error) {
+  } catch (e) {
+    const error = new HttpError(
+      'Loggin in failed, please try again later.',
+      500
+    );
+    return next(error);
   }
 
   if (!existingUser) {
-    console.log('no user found');
+    const error = new HttpError(
+      'Invalid credentials, could not log you in.',
+      401
+    );
+    return next(error);
   }
 
   try {
     // @ts-ignore
     isValidPassword = await bcrypt.compare(password, existingUser.password);
-  } catch(error) {}
+  } catch(e) {
+    const error = new HttpError(
+      'Loggin in failed, please try again later.',
+      500
+    );
+    return next(error);
+  }
+
+  if (!isValidPassword) {
+    const error = new HttpError(
+      'Invalid credentials, could not log you in.',
+      401
+    );
+    return next(error);
+  }
 
   // @ts-ignore
   delete userData.password;
