@@ -1,5 +1,5 @@
-import { User } from "../models/user.js";
-import { UserSubscription } from "../models/userSubscription.js"
+import { User } from '../models/user.js';
+import { UserSubscription } from '../models/userSubscription.js';
 
 export const buySubscription = async(req, res) => {
   const { userId, plan } = req.body;
@@ -27,8 +27,8 @@ export const buySubscription = async(req, res) => {
     // @ts-ignore
     existingUser.userSubscriptionId = existingSubscription;
     // @ts-ignore
-    existingUser.save()
-    res.json({plan: result.plan})
+    existingUser.save();
+    res.json({ plan: result.plan });
   } catch (error) {}
 }
 
@@ -37,7 +37,7 @@ export const updateSubscription = async(req, res) => {
   let existingSubscription, existingUser;
 
   try {
-    existingSubscription = await UserSubscription.findOne({userId});
+    existingSubscription = await UserSubscription.findOne({ userId });
   } catch (error) {}
 
   // @ts-ignore
@@ -61,8 +61,8 @@ export const updateSubscription = async(req, res) => {
     // @ts-ignore
     existingUser.userSubscriptionId = existingSubscription;
     // @ts-ignore
-    existingUser.save()
+    existingUser.save();
     // @ts-ignore
-    res.json({plan: existingSubscription.plan, expirationdate: existingSubscription.expirationdate})
+    res.json({ plan: existingSubscription.plan, expirationdate: existingSubscription.expirationdate });
   } catch (error) {}
 }
