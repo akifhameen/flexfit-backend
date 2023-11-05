@@ -69,3 +69,28 @@ export const login = async (req, res) => {
     user: userData
   });
 };
+
+
+// export const updateUserSubscription = async(req, res) => {
+//   const { userId, subscriptionId } = req.body;
+//   let existingUser;
+
+//   try {
+//     existingUser = await User.findOne({ _id: userId });
+//   } catch (error) {
+//   }
+
+//   if (!existingUser) {
+//     console.log('no user found');
+//   }
+
+//   // @ts-ignore
+//   existingUser.userSubscriptionId = subscriptionId;
+
+//   try {
+//     // @ts-ignore
+//     await existingUser.save();
+//     // @ts-ignore
+//     res.json({subscriptionId: existingUser.userSubscriptionId})
+//   } catch (error) {}
+// };
