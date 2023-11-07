@@ -4,7 +4,7 @@ import { getAllAvailableTrainers, getAllTrainers, getTrainerAvailability, hireTr
 const router = express.Router();
 
 router.post('/trainers/hire', hireTrainer);
-router.get('/trainers/getTrainerAvailability', getTrainerAvailability);
+router.get('/trainers/getTrainerAvailability/:trainerId/:day', getTrainerAvailability);
 router.get('/traimers/allAvailableTrainers', getAllAvailableTrainers);
 router.get('/trainers/getAllTrainers', getAllTrainers)
 

@@ -15,8 +15,6 @@ export const addClass = async(req, res) => {
   if (!timeslot) {
     console.log('no timeslot');
   }
-  // @ts-ignore
-  timeslot.classId = createdClass;
 
   try {
     trainer = await Trainer.findOne({ userId: trainerId });
@@ -43,6 +41,8 @@ export const addClass = async(req, res) => {
   try {
     // @ts-ignore
     createdClass = await newClass.save();
+    // @ts-ignore
+    timeslot.classId = createdClass;
     // @ts-ignore
     await timeslot.save();
     // @ts-ignore

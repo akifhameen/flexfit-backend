@@ -6,7 +6,7 @@ export const timeslotInit = async() => {
   let day, startTime, endTime;
 
   const existingDataCount = await Timeslot.countDocuments();
-    if (existingDataCount === 0) {
+  if (existingDataCount === 0) {
     for (const eachDay in days) {
       day = eachDay;
       for (let i = 6; i < 22; i++) {
