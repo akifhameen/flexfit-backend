@@ -136,24 +136,29 @@ export const login = async (req, res, next) => {
   res.json({ ...userData, isAuthenticated: true });
 };
 
-export const enrollOrQuitClass = async(req, res) => {
+export const enrollOrQuitClass = async(req, res, next) => {
   const { userId, classId } = req.body;
   let user, updatedUser;
 
   try {
-    user = await User.findById(userId);
+    user = await User.findById(userId).populate('UserSubscription');
   } catch (e) {}
 
   if (!user) {
     console.log('no user')
   }
+    // @ts-ignore
+    if (user.userSubscriptionId.plan !== 'premium') {
+      const error = new HttpError('User does not have a required subscription!', 401);
+      next(error);
+    }
 
   // @ts-ignore
   if (user.classIds.length > 0) {
     // @ts-ignore
-    const duplicatedClassId = user.classIds.map(eachClassId => eachClassId.toString()).filter(eachClassId => eachClassId !== classId);
+    const newClassIds = user.classIds.map(eachClassId => eachClassId.toString()).filter(eachClassId => { return eachClassId !== classId });
     // @ts-ignore
-    !duplicatedClassId && user.classIds.push(classId);
+    user.classIds = newClassIds;
   } else {
     // @ts-ignore
     user.classIds.push(classId);

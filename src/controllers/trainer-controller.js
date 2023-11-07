@@ -34,7 +34,7 @@ export const hireTrainer = async(req, res, next) => {
 };
 
 export const getTrainerAvailability = async(req, res, next) => {
-  const { trainerId, day } = req.body;
+  const { trainerId, day } = req.params;
   let trainer, trainerTakenSlotIds, trainerAvailableSlots, availableSlotData;
 
   trainer = await Trainer.findById(trainerId);
