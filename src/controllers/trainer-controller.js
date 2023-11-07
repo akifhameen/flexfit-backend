@@ -65,13 +65,30 @@ export const getTrainerAvailability = async(req, res, next) => {
   res.json(availableSlotData);
 };
 
-export const getTrainerList = async(req, res) => {
+export const getAllAvailableTrainers = async(req, res) => {
   const trainers = (await Trainer.find({ remainingSlots: { $gt: 0 } }).populate('User')).map(trainer => {
     return {
       // @ts-ignore
       id: trainer._id,
       // @ts-ignore
       name: `${trainer.userId.firstName} ${trainer.userId.lastName}`,
+    }
+  });
+
+  res.json(trainers);
+};
+
+export const getAllTrainers = async(req, res) => {
+  const trainers = (await Trainer.find().populate('User')).map(trainer => {
+    return {
+      // @ts-ignore
+      id: trainer._id,
+      // @ts-ignore
+      name: `${trainer.userId.firstName} ${trainer.userId.lastName}`,
+      // @ts-ignore
+      picture: trainer.picture,
+      // @ts-ignore
+      description: trainer.description
     }
   });
 

@@ -9,7 +9,7 @@ export const createUser = async (req, res, next) => {
   let checkUserEmail, hashedPassword;
 
   try {
-    checkUserEmail = await User.findOne({ email: email });
+    checkUserEmail = await User.findOne({ email });
   } catch (e) {
     const error = new HttpError(
       'Signing up failed, please try again later.',
@@ -48,10 +48,7 @@ export const createUser = async (req, res, next) => {
     delete getUser.password;
     delete getUser._id;
     delete getUser.__v;
-    res.json({
-      isAuthenticated: true,
-      user: getUser
-    });
+    res.json({ ...getUser, isAuthenticated: true });
   } catch (e) {
     const error = new HttpError(
       'Signing up failed, please try again later.',
@@ -63,10 +60,11 @@ export const createUser = async (req, res, next) => {
 
 export const login = async (req, res, next) => {
   const { email, password } = req.body;
+  console.log(email, password)
   let existingUser, userData, isValidPassword, userSubscription;
 
   try {
-    existingUser = await User.findOne({ email: email });
+    existingUser = await User.findOne({ email });
     // @ts-ignore
     userData = existingUser.toObject({ getters: true });
   } catch (e) {
@@ -135,10 +133,7 @@ export const login = async (req, res, next) => {
   delete userData._id;
   delete userData.__v;
 
-  res.json({
-    isAuthenticated: true,
-    user: userData
-  });
+  res.json({ ...userData, isAuthenticated: true });
 };
 
 export const enrollOrQuitClass = async(req, res) => {
@@ -156,9 +151,9 @@ export const enrollOrQuitClass = async(req, res) => {
   // @ts-ignore
   if (user.classIds.length > 0) {
     // @ts-ignore
-    const newClassIds = user.classIds.map(eachClassId => eachClassId.toString()).filter(eachClassId => { return eachClassId !== classId });
+    const duplicatedClassId = user.classIds.map(eachClassId => eachClassId.toString()).filter(eachClassId => eachClassId !== classId);
     // @ts-ignore
-    user.classIds = newClassIds;
+    !duplicatedClassId && user.classIds.push(classId);
   } else {
     // @ts-ignore
     user.classIds.push(classId);
@@ -173,15 +168,16 @@ export const enrollOrQuitClass = async(req, res) => {
     delete updatedUser._id;
     delete updatedUser.__v;
   } catch (e) {}
+
   res.send(updatedUser)
 };
 
 export const getUserByEmail = async(req, res) => {
-  const email = req.body.email;
+  const email = req.query.email;
   let user;
 
   try {
-    user = await User.findOne(email);
+    user = await User.findOne({ email });
     // @ts-ignore
     user = user.toObject({ getters: true });
   } catch (e) {}
@@ -195,10 +191,10 @@ export const getUserByEmail = async(req, res) => {
 
 export const updateRoleByEmail = async(req, res, next) => {
   const { email, role } = req.body;
-  let user, updatedUser, trainer, trainerResult;
+  let user, updatedUser, trainer;
 
   try {
-    user = await User.findOne(email);
+    user = await User.findOne({ email });
   } catch (e) {}
 
   if (!user) {
